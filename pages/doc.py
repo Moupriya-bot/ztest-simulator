@@ -1,51 +1,29 @@
+from pathlib import Path
 
 import streamlit as st
-import base64
-from pathlib import Path
-import streamlit.components.v1 as components
 
-st.set_page_config(
-    page_title="Project Documentation",
-    page_icon="📄",
-    layout="wide"
-)
+st.set_page_config(page_title="Project Documentation", layout="wide")
 
-st.title("Z-Test Simulator Documentation")
-st.write("Project report and documentation.")
+st.title("Project Documentation")
 
-# Locate the PDF in the root directory
+# Find Documentation.pdf in the main folder (one level above "pages")
 pdf_path = Path(__file__).parent.parent / "Documentation.pdf"
 
-if pdf_path.exists():
+if not pdf_path.exists():
+    st.error("Documentation.pdf was not found in the repository.")
+else:
+    pdf_bytes = pdf_path.read_bytes()
 
-    with open(pdf_path, "rb") as file:
-        pdf_bytes = file.read()
-
-    # Display PDF
-    base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-
-    pdf_display = f"""
-    <iframe
-        src="data:application/pdf;base64,{base64_pdf}"
-        width="100%"
-        height="850"
-        type="application/pdf">
-    </iframe>
-    """
-
-    components.html(
-        pdf_display,
-        height=870,
-        scrolling=True
-    )
-
-    # Download option
+    # Download button (always works)
     st.download_button(
-        label="Download Documentation PDF",
+        label="Download Documentation (PDF)",
         data=pdf_bytes,
         file_name="Documentation.pdf",
-        mime="application/pdf"
+        mime="application/pdf",
     )
 
-else:
-    st.error("Documentation.pdf not found!")
+    # Show the PDF on the page (needs streamlit[pdf] in requirements.txt)
+    try:
+        st.pdf(pdf_bytes, height=800)
+    except Exception:
+        st.info("The PDF preview is not available here. Please use the download button above.")
